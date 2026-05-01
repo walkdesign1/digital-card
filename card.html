@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>디지털 명함</title>
+  <meta property="og:title" content="디지털 명함">
+  <meta property="og:description" content="카드메이커로 만든 디지털 명함입니다.">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Playfair+Display:wght@700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:#f5f5f3;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+
+    .page-wrap{width:100%;max-width:440px}
+
+    /* LOADING / ERROR */
+    .status{text-align:center;color:#888;font-size:14px;padding:40px}
+
+    /* ACTION BUTTONS */
+    .actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none}
+    .btn-primary{background:#111;color:#fff}
+    .btn-primary:hover{background:#333}
+    .btn-outline{background:#fff;color:#111;border:1px solid #e0dbd3}
+    .btn-outline:hover{border-color:#aaa}
+
+    /* FOOTER LINK */
+    .footer{text-align:center;margin-top:24px;font-size:12px;color:#aaa}
+    .footer a{color:#888;text-decoration:none}
+    .footer a:hover{color:#111}
+
+    /* CARD TEMPLATES */
+    .card-t1{background:#fafaf8;border:1px solid #e8e4dc;border-radius:16px;padding:30px;position:relative;overflow:hidden}
+    .card-t1-accent{position:absolute;top:0;left:0;width:4px;height:100%;background:#2d2d2d}
+    .card-t1-body{padding-left:12px}
+    .card-t1-photo{width:60px;height:60px;border-radius:50%;background:#e4e0d8;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;color:#8a8480;border:2px solid #d8d4cc;margin-bottom:16px;overflow:hidden}
+    .card-t1-photo img{width:100%;height:100%;object-fit:cover}
+    .card-t1-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:#1a1a1a;letter-spacing:-.01em;line-height:1.1}
+    .card-t1-role{font-family:'DM Sans',sans-serif;font-size:11px;color:#6b6560;margin-top:4px;letter-spacing:.04em}
+    .card-t1-divider{height:1px;background:#e0dbd3;margin:16px 0}
+    .card-t1-info{display:flex;flex-direction:column;gap:7px}
+    .card-t1-row{font-family:'DM Sans',sans-serif;font-size:13px;color:#5a5652;display:flex;align-items:center;gap:8px}
+    .card-t1-bio{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#8a8480;margin-top:14px;line-height:1.55}
+    .card-t1-sns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+    .card-t1-pill{font-family:'DM Sans',sans-serif;font-size:11px;color:#6b6560;border:1px solid #ddd8d0;border-radius:20px;padding:5px 12px;letter-spacing:.05em;cursor:pointer;text-decoration:none;transition:border-color .15s}
+    .card-t1-pill:hover{border-color:#aaa;color:#333}
+
+    .card-t2{background:#16213e;border-radius:16px;overflow:hidden}
+    .card-t2-top{padding:28px 28px 20px;position:relative}
+    .card-t2-stripe{position:absolute;top:0;right:0;width:80px;height:100%;background:linear-gradient(135deg,#c9a84c22,#c9a84c08)}
+    .card-t2-badge{display:inline-block;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:.18em;color:#c9a84c;border:1px solid #c9a84c55;border-radius:2px;padding:3px 8px;margin-bottom:14px;text-transform:uppercase}
+    .card-t2-header{display:flex;align-items:center;gap:16px}
+    .card-t2-photo{width:62px;height:62px;border-radius:10px;background:#1e2d52;border:2px solid #c9a84c44;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:#c9a84c;flex-shrink:0;overflow:hidden}
+    .card-t2-photo img{width:100%;height:100%;object-fit:cover}
+    .card-t2-name{font-family:'Playfair Display',serif;font-size:22px;color:#f0ece4;line-height:1.2}
+    .card-t2-role{font-family:'DM Sans',sans-serif;font-size:11px;color:#c9a84c;margin-top:4px;letter-spacing:.08em}
+    .card-t2-company{font-family:'DM Sans',sans-serif;font-size:11px;color:#7888aa;margin-top:2px}
+    .card-t2-bio{font-family:'DM Sans',sans-serif;font-size:12px;color:#4a5a7a;margin-top:12px;line-height:1.65;font-style:italic}
+    .card-t2-bottom{background:#0f1729;padding:18px 28px 22px;border-top:1px solid #c9a84c22}
+    .card-t2-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .card-t2-item-label{font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:.12em;color:#4a5a7a;text-transform:uppercase;margin-bottom:3px}
+    .card-t2-item-val{font-family:'DM Sans',sans-serif;font-size:12px;color:#c4cce0}
+    .card-t2-sns{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid #1e2d52;flex-wrap:wrap}
+    .card-t2-sns-btn{font-family:'DM Sans',sans-serif;font-size:11px;color:#7888aa;border:1px solid #1e2d52;border-radius:4px;padding:6px 12px;cursor:pointer;text-decoration:none;transition:border-color .15s}
+    .card-t2-sns-btn:hover{border-color:#4a5a7a;color:#c4cce0}
+
+    .card-t3{background:#111;border-radius:16px;overflow:hidden;position:relative}
+    .card-t3-line{position:absolute;top:0;left:0;width:3px;height:100%}
+    .card-t3-inner{padding:28px 28px 26px 32px;position:relative;z-index:1}
+    .card-t3-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+    .card-t3-photo{width:52px;height:52px;border-radius:4px;background:#1e1e1e;border:1.5px solid #2e2e2e;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;position:relative;overflow:hidden}
+    .card-t3-photo img{width:100%;height:100%;object-fit:cover}
+    .card-t3-tag{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;letter-spacing:.18em;border:1px solid;border-radius:2px;padding:4px 10px;text-transform:uppercase}
+    .card-t3-name{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.02em}
+    .card-t3-role{font-family:'DM Sans',sans-serif;font-size:12px;color:#b0b0b0;margin-top:6px;letter-spacing:.04em}
+    .card-t3-bio{font-family:'DM Sans',sans-serif;font-size:12px;color:#888;margin-top:14px;line-height:1.65;border-left:1.5px solid #2e2e2e;padding-left:10px}
+    .card-t3-rule{height:1px;background:#2a2a2a;margin:18px 0;position:relative}
+    .card-t3-rule::after{content:'';position:absolute;top:0;left:0;width:40px;height:1px}
+    .card-t3-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+    .card-t3-info{display:flex;flex-direction:column;gap:6px}
+    .card-t3-row{font-family:'DM Sans',sans-serif;font-size:12px;color:#d0d0d0}
+    .card-t3-row span{font-weight:500}
+    .card-t3-sns{display:flex;gap:6px}
+    .card-t3-dot{width:36px;height:36px;border-radius:4px;background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:#aaa;cursor:pointer;text-decoration:none;transition:border-color .15s,color .15s}
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div id="card-container"><div class="status">명함을 불러오는 중...</div></div>
+  <div class="actions" id="actions" style="display:none">
+    <button class="btn btn-primary" onclick="downloadVCard()">📥 연락처 저장하기</button>
+    <button class="btn btn-outline" onclick="shareCard()">🔗 이 명함 공유하기</button>
+  </div>
+  <div class="footer">
+    <a href="index.html">카드메이커로 나만의 명함 만들기 →</a>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ============================================================
+// ⚠️  index.html과 동일한 Firebase 설정값을 여기도 붙여넣으세요
+// ============================================================
+const firebaseConfig = {
+  apiKey:            "AIzaSyBC4qnGV2evXi4woOVn0zM5keqyQ4G9qR4",
+  authDomain:        "walkdesign1-f0c26.firebaseapp.com",
+  projectId:         "walkdesign1-f0c26",
+  storageBucket:     "walkdesign1-f0c26.firebasestorage.app",
+  messagingSenderId: "634002662769",
+  appId:             "1:634002662769:web:b2fd914edfcb58610442d0"
+};
+// ============================================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let cardData = null;
+
+async function loadCard(){
+  const id = new URLSearchParams(location.search).get('id');
+  if(!id){ document.getElementById('card-container').innerHTML = '<div class="status">명함을 찾을 수 없어요.</div>'; return; }
+  try {
+    const doc = await db.collection('cards').doc(id).get();
+    if(!doc.exists){ document.getElementById('card-container').innerHTML = '<div class="status">삭제됐거나 존재하지 않는 명함이에요.</div>'; return; }
+    cardData = doc.data();
+    document.title = `${cardData.name}의 디지털 명함`;
+    document.getElementById('card-container').innerHTML = renderCard(cardData);
+    document.getElementById('actions').style.display = 'flex';
+  } catch(e){ document.getElementById('card-container').innerHTML = `<div class="status">오류가 발생했어요: ${e.message}</div>`; }
+}
+
+function renderCard(d){
+  const ac   = d.accentColor || '#00e5c8';
+  const photo= d.photoBase64 || '';
+  const init = d.name?d.name[0]:'?';
+  const ph   = photo ? `<img src="${photo}" alt="">` : init;
+  const ig   = d.instagram ? `<a class="card-t1-pill" href="https://instagram.com/${d.instagram.replace('@','')}" target="_blank">Instagram</a>` : '';
+  const li   = d.linkedin  ? `<a class="card-t1-pill" href="${d.linkedin.startsWith('http')?d.linkedin:'https://'+d.linkedin}" target="_blank">LinkedIn</a>` : '';
+
+  if(d.template===1) return `<div class="card-t1">
+    <div class="card-t1-accent"></div>
+    <div class="card-t1-body">
+      <div class="card-t1-photo">${ph}</div>
+      <div class="card-t1-name">${d.name}</div>
+      <div class="card-t1-role">${[d.role,d.company].filter(Boolean).join(' · ')}</div>
+      <div class="card-t1-divider"></div>
+      <div class="card-t1-info">
+        ${d.phone?`<div class="card-t1-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.5;flex-shrink:0"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 4.18 2 2 0 015 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg><a href="tel:${d.phone}">${d.phone}</a></div>`:''}
+        ${d.email?`<div class="card-t1-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.5;flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:${d.email}">${d.email}</a></div>`:''}
+      </div>
+      ${d.bio?`<div class="card-t1-bio">"${d.bio}"</div>`:''}
+      <div class="card-t1-sns">${ig}${li}</div>
+    </div></div>`;
+
+  if(d.template===2) return `<div class="card-t2">
+    <div class="card-t2-top">
+      <div class="card-t2-stripe"></div>
+      ${d.company?`<div class="card-t2-badge">${d.company}</div>`:''}
+      <div class="card-t2-header">
+        <div class="card-t2-photo">${ph}</div>
+        <div>
+          <div class="card-t2-name">${d.name}</div>
+          <div class="card-t2-role">${d.role||''}</div>
+          ${d.company?`<div class="card-t2-company">${d.company}</div>`:''}
+        </div>
+      </div>
+      ${d.bio?`<div class="card-t2-bio">"${d.bio}"</div>`:''}
+    </div>
+    <div class="card-t2-bottom">
+      <div class="card-t2-grid">
+        ${d.phone?`<div><div class="card-t2-item-label">전화</div><div class="card-t2-item-val"><a href="tel:${d.phone}" style="color:inherit;text-decoration:none">${d.phone}</a></div></div>`:''}
+        ${d.email?`<div><div class="card-t2-item-label">이메일</div><div class="card-t2-item-val"><a href="mailto:${d.email}" style="color:inherit;text-decoration:none">${d.email}</a></div></div>`:''}
+      </div>
+      <div class="card-t2-sns">
+        ${d.instagram?`<a class="card-t2-sns-btn" href="https://instagram.com/${d.instagram.replace('@','')}" target="_blank">Instagram</a>`:''}
+        ${d.linkedin?`<a class="card-t2-sns-btn" href="${d.linkedin.startsWith('http')?d.linkedin:'https://'+d.linkedin}" target="_blank">LinkedIn</a>`:''}
+      </div>
+    </div></div>`;
+
+  return `<div class="card-t3">
+    <div class="card-t3-line" style="background:${ac}"></div>
+    <style>.card-t3-rule::after{background:${ac}!important}</style>
+    <div class="card-t3-inner">
+      <div class="card-t3-top">
+        <div class="card-t3-photo" style="position:relative">${ph}<span style="position:absolute;bottom:0;left:0;right:0;height:2px;background:${ac}"></span></div>
+        ${d.role?`<div class="card-t3-tag" style="color:${ac};border-color:${ac}55">${d.role}</div>`:''}
+      </div>
+      <div class="card-t3-name">${d.name}</div>
+      <div class="card-t3-role">${[d.role,d.company].filter(Boolean).join(' · ')}</div>
+      ${d.bio?`<div class="card-t3-bio">"${d.bio}"</div>`:''}
+      <div class="card-t3-rule"></div>
+      <div class="card-t3-bottom">
+        <div class="card-t3-info">
+          ${d.phone?`<div class="card-t3-row"><span style="color:${ac}">T. </span><a href="tel:${d.phone}" style="color:inherit;text-decoration:none">${d.phone}</a></div>`:''}
+          ${d.email?`<div class="card-t3-row"><span style="color:${ac}">E. </span><a href="mailto:${d.email}" style="color:inherit;text-decoration:none">${d.email}</a></div>`:''}
+        </div>
+        <div class="card-t3-sns">
+          ${d.instagram?`<a class="card-t3-dot" href="https://instagram.com/${d.instagram.replace('@','')}" target="_blank" style="color:#aaa;border-color:#333">IG</a>`:''}
+          ${d.linkedin?`<a class="card-t3-dot" href="${d.linkedin.startsWith('http')?d.linkedin:'https://'+d.linkedin}" target="_blank" style="color:#aaa;border-color:#333">LI</a>`:''}
+        </div>
+      </div>
+    </div></div>`;
+}
+
+function downloadVCard(){
+  if(!cardData) return;
+  const vc = `BEGIN:VCARD\nVERSION:3.0\nFN:${cardData.name}\nTITLE:${cardData.role||''}\nORG:${cardData.company||''}\nTEL:${cardData.phone||''}\nEMAIL:${cardData.email||''}\nURL:${cardData.linkedin||''}\nEND:VCARD`;
+  const a  = Object.assign(document.createElement('a'),{ href:URL.createObjectURL(new Blob([vc],{type:'text/vcard'})), download:`${cardData.name}.vcf` });
+  a.click();
+}
+
+function shareCard(){
+  if(navigator.share){ navigator.share({ title:`${cardData.name}의 디지털 명함`, url:location.href }); }
+  else { navigator.clipboard.writeText(location.href).then(() => alert('링크가 복사됐어요!')); }
+}
+
+loadCard();
+</script>
+</body>
+</html>
