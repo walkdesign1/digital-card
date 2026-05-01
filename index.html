@@ -547,7 +547,7 @@ async function loadCards(){
       div.onclick = () => editCard(doc.id, d);
       grid.appendChild(div);
     });
-  } catch(e){ showToast('불러오기 실패: '+e.message); }
+  } catch(e){ showToast('오류: '+e.message, 6000); console.error(e); }
 }
 
 function editCard(id, d){
